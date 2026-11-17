@@ -1,0 +1,26 @@
+menu "exam-uncheat sensor"
+
+config EXU_ENABLE_BLE
+    bool "Receive BLE advertisements (passive scan only)"
+    default y
+
+config EXU_ENABLE_WIFI
+    bool "Receive Wi-Fi management frames (promiscuous receive only)"
+    default y
+
+config EXU_DWELL_MS
+    int "Wi-Fi channel dwell time (ms)"
+    range 50 2000
+    default 250
+
+config EXU_STATS_PERIOD_S
+    int "Data-frame statistics / health period (s)"
+    range 2 120
+    default 10
+
+config EXU_SCAN_5G
+    bool "Include 5 GHz channels (ESP32-C5 only)"
+    depends on SOC_WIFI_SUPPORT_5G
+    default y
+
+endmenu

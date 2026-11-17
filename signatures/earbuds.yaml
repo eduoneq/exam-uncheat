@@ -1,0 +1,43 @@
+schema: exam-uncheat.signature/v1
+license: CC-BY-4.0
+signatures:
+  - id: earbuds.google_fast_pair
+    name: "Google Fast Pair 광고 (서비스 UUID 0xFE2C)"
+    category: earbuds
+    vendor: "다수 (Fast Pair 지원 오디오 기기)"
+    match:
+      kind: ble.adv
+      any:
+        - {field: attrs.service_uuids, contains: "fe2c"}
+        - {field: attrs.service_data, contains: "fe2c"}
+    confidence: low
+    weight: 25
+    notes:
+      - "Fast Pair 공급자 기기는 서비스 데이터 UUID 0xFE2C로 광고(Google 사양). 이어버드 외 스피커 등도 포함"
+      - "주로 페어링 모드·근처 알림 시 광고 — 이미 연결된 이어버드는 보이지 않을 수 있음"
+    spoofable: true
+    sources:
+      - https://developers.google.com/nearby/fast-pair/specifications/service/provider
+    last_verified: "2026-11-17"
+    verified_by: literature
+
+  - id: earbuds.apple_proximity_pairing
+    name: "Apple Proximity Pairing 메시지 (AirPods 등, Continuity 타입 0x07)"
+    category: earbuds
+    vendor: "Apple"
+    match:
+      kind: ble.adv
+      all:
+        - {field: attrs.company_id, eq: 0x004C}
+        - {field: attrs.mfg_data_hex, hex_prefix: "07"}
+    confidence: low
+    weight: 25
+    notes:
+      - "0x004C = Apple, Inc. (SIG). 제조사 데이터 첫 바이트(타입) 0x07 = Proximity Pairing (furiousMAC continuity 역분석)"
+      - "케이스를 열거나 근처 아이폰과 상호작용할 때 주로 나타남. 수거한 아이폰·에어팟이 교실 안에 있으면 오탐"
+    spoofable: true
+    sources:
+      - https://github.com/furiousMAC/continuity
+      - https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/company_identifiers/company_identifiers.yaml
+    last_verified: "2026-11-17"
+    verified_by: literature

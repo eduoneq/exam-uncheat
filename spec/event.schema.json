@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/eduoneq/exam-uncheat/blob/main/spec/event.schema.json",
+  "title": "exam-uncheat.event/v1",
+  "description": "Normalized, receive-only observation emitted by any sensor adapter. Transport: serial line-JSON (NDJSON), WebSocket text frames, HTTP POST (application/x-ndjson or JSON array), or MQTT.",
+  "type": "object",
+  "required": ["schema", "sensor", "kind"],
+  "properties": {
+    "schema": {"const": "exam-uncheat.event/v1"},
+    "event_id": {"type": "string", "minLength": 8, "maxLength": 64},
+    "ts": {"type": "string", "description": "RFC 3339 with offset. Set by the hub on receipt if absent."},
+    "sensor_ts_ms": {"type": "integer", "minimum": 0},
+    "offset_s": {"type": "number", "minimum": 0, "description": "Replay only: seconds from scenario start."},
+    "sensor": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1, "maxLength": 64},
+        "driver": {"type": "string"},
+        "location": {
+          "type": "object",
+          "properties": {
+            "site": {"type": "string"},
+            "room": {"type": "string"},
+            "zone": {"type": "string"}
+          }
+        }
+      }
+    },
+    "kind": {
+      "enum": [
+        "ble.adv", "ble.conn_activity",
+        "wifi.probe_req", "wifi.beacon", "wifi.station", "wifi.p2p",
+        "rf.energy", "detector.alert", "sensor.health"
+      ]
+    },
+    "band": {"enum": ["sub-GHz", "2.4GHz", "5GHz", "6GHz", "other"]},
+    "channel": {"type": "integer", "minimum": 0, "maximum": 233},
+    "freq_mhz": {"type": "number", "minimum": 0},
+    "rssi_dbm": {"type": "number", "minimum": -130, "maximum": 20},
+    "subject": {
+      "type": "object",
+      "properties": {
+        "addr": {"type": "string", "pattern": "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"},
+        "addr_type": {"enum": ["public", "random", "unknown"]},
+        "pid": {"type": "string"},
+        "oui": {"type": ["string", "null"]}
+      }
+    },
+    "attrs": {"type": "object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"kind": {"const": "ble.adv"}}},
+      "then": {"properties": {"attrs": {"properties": {
+        "company_id": {"type": "integer", "minimum": 0, "maximum": 65535},
+        "service_uuids": {"type": "array", "items": {"type": "string", "pattern": "^[0-9a-f]{4}$|^[0-9a-f-]{36}$"}},
+        "service_data": {"type": "object"},
+        "mfg_data_hex": {"type": "string", "pattern": "^[0-9a-fA-F]*$"},
+        "name": {"type": "string"},
+        "connectable": {"type": "boolean"}
+      }}}}
+    },
+    {
+      "if": {"properties": {"kind": {"const": "rf.energy"}}},
+      "then": {"properties": {"attrs": {"required": ["f_start_mhz", "f_stop_mhz"], "properties": {
+        "f_start_mhz": {"type": "number"},
+        "f_stop_mhz": {"type": "number"},
+        "peak_dbm": {"type": "number"},
+        "occupancy": {"type": "number", "minimum": 0, "maximum": 1}
+      }}}}
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,155 @@
+schema: exam-uncheat.signature/v1
+license: CC-BY-4.0
+# Company identifiers and 16-bit member UUIDs are copied from the official
+# Bluetooth SIG Assigned Numbers registry (checked 2026-11-17):
+#   https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/company_identifiers/company_identifiers.yaml
+#   https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/uuids/member_uuids.yaml
+# No code or data files from AGPL projects are included.
+signatures:
+  - id: glasses.meta.service
+    name: "Meta 서비스 UUID 0xFD5F 광고"
+    category: smart_glasses
+    vendor: "Meta Platforms / EssilorLuxottica"
+    match:
+      kind: ble.adv
+      any:
+        - {field: attrs.service_uuids, contains: "fd5f"}
+        - {field: attrs.service_data, contains: "fd5f"}
+    confidence: medium
+    weight: 45
+    notes:
+      - "0x01AB = Meta Platforms, Inc. / 0x058E = Meta Platforms Technologies, LLC / UUID 0xFD5F = Meta Platforms Technologies, LLC (SIG 등록부)"
+      - "Ray-Ban Meta 등은 페어링 모드에서 이 서비스로 광고한다는 커뮤니티 역분석 자료가 있음(비공식). 페어링·연결된 안경은 광고를 멈춰 보이지 않을 수 있음"
+      - "Quest 등 같은 회사 다른 기기도 같은 UUID를 쓸 수 있음 — 오탐 가능"
+    spoofable: true
+    sources:
+      - https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/company_identifiers/company_identifiers.yaml
+      - https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/uuids/member_uuids.yaml
+      - https://visor.macedonga.com/protocol/radios-and-links/
+    last_verified: "2026-11-17"
+    verified_by: literature
+
+  - id: glasses.meta.payload
+    name: "Ray-Ban Meta 페이로드 문자열 META_RB_GLASS"
+    category: smart_glasses
+    vendor: "Meta Platforms / EssilorLuxottica"
+    match:
+      kind: ble.adv
+      any:
+        - {field: attrs.mfg_data_ascii, contains: "META_RB_GLASS"}
+        - {field: attrs.service_data_ascii, contains: "META_RB_GLASS"}
+    confidence: high
+    weight: 70
+    notes:
+      - "Spectacle(MIT)이 Meta 회사 ID만으로는 모호하다고 보고 페이로드 문자열을 함께 요구하는 방식"
+    spoofable: true
+    sources:
+      - https://github.com/kevinl95/Spectacle
+    last_verified: "2026-11-17"
+    verified_by: literature
+
+  - id: glasses.meta.company_only
+    name: "Meta 회사 ID 광고 (서비스 UUID 없음)"
+    category: smart_glasses
+    vendor: "Meta Platforms"
+    match:
+      kind: ble.adv
+      all:
+        - {field: attrs.company_id, in: [0x01AB, 0x058E]}
+    confidence: low
+    weight: 20
+    notes:
+      - "Quest 헤드셋·컨트롤러 등 다른 Meta 기기일 가능성이 큼. 단독으로는 참고용"
+    spoofable: true
+    sources:
+      - https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/company_identifiers/company_identifiers.yaml
+    last_verified: "2026-11-17"
+    verified_by: literature
+
+  - id: glasses.luxottica.company
+    name: "Luxottica 회사 ID (0x0D53)"
+    category: smart_glasses
+    vendor: "Luxottica Group S.p.A"
+    match:
+      kind: ble.adv
+      all:
+        - {field: attrs.company_id, eq: 0x0D53}
+    confidence: medium
+    weight: 45
+    notes:
+      - "0x0D53 = Luxottica Group S.p.A (SIG 등록부). 안경 제조사 회사 ID"
+    spoofable: true
+    sources:
+      - https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/company_identifiers/company_identifiers.yaml
+    last_verified: "2026-11-17"
+    verified_by: literature
+
+  - id: glasses.snap
+    name: "Snap Spectacles (Snapchat 회사 ID 0x03C2 / UUID 0xFE45)"
+    category: smart_glasses
+    vendor: "Snap Inc."
+    match:
+      kind: ble.adv
+      any:
+        - {field: attrs.company_id, eq: 0x03C2}
+        - {field: attrs.service_uuids, contains: "fe45"}
+    confidence: medium
+    weight: 40
+    notes:
+      - "0x03C2 = Snapchat Inc, member UUID 0xFE45 = Snapchat Inc (SIG 등록부)"
+    spoofable: true
+    sources:
+      - https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/company_identifiers/company_identifiers.yaml
+      - https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/uuids/member_uuids.yaml
+    last_verified: "2026-11-17"
+    verified_by: literature
+
+  - id: glasses.vuzix
+    name: "Vuzix 회사 ID (0x060C)"
+    category: smart_glasses
+    vendor: "Vuzix Corporation"
+    match:
+      kind: ble.adv
+      all:
+        - {field: attrs.company_id, eq: 0x060C}
+    confidence: medium
+    weight: 40
+    spoofable: true
+    sources:
+      - https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/company_identifiers/company_identifiers.yaml
+    last_verified: "2026-11-17"
+    verified_by: literature
+
+  - id: glasses.even_realities
+    name: "Even Realities 회사 ID (0x10F9)"
+    category: smart_glasses
+    vendor: "Even Realities Ltd."
+    match:
+      kind: ble.adv
+      all:
+        - {field: attrs.company_id, eq: 0x10F9}
+    confidence: medium
+    weight: 40
+    spoofable: true
+    sources:
+      - https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/company_identifiers/company_identifiers.yaml
+    last_verified: "2026-11-17"
+    verified_by: literature
+
+  - id: glasses.name_pattern
+    name: "스마트안경 제품명 패턴 (광고 이름)"
+    category: smart_glasses
+    match:
+      kind: ble.adv
+      all:
+        - {field: attrs.name, regex: "(?i)(ray-?ban|oakley meta|spectacles|xreal|rokid|rayneo|inmo|even g\\d|vuzix|halliday)"}
+    confidence: medium
+    weight: 35
+    notes:
+      - "기기 이름은 사용자가 바꾸거나 숨길 수 있음. 이름이 없으면 회사 ID 규칙에 의존"
+      - "목록은 공개 제품명 기준. KoriyoSCAN 계열 개작(Apache-2.0)의 이름 카탈로그를 참고해 독자 작성"
+    spoofable: true
+    sources:
+      - https://github.com/kohoo24/ai-glasses-exam-guard
+    last_verified: "2026-11-17"
+    verified_by: heuristic

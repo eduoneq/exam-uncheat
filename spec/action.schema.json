@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "exam-uncheat.action/v1",
+  "description": "Proctor decision recorded against a clue. Personal identifiers (names, exam numbers) are not accepted by default.",
+  "type": "object",
+  "required": ["clue_id", "decision"],
+  "properties": {
+    "clue_id": {"type": "string"},
+    "decision": {"enum": ["confirmed_device", "false_positive", "needs_more_check", "no_action"]},
+    "actor_role": {"type": "string", "maxLength": 32, "pattern": "^[a-zA-Z0-9_-]*$"},
+    "checklist": {"type": "array", "items": {"type": "string", "maxLength": 200}},
+    "note": {"type": "string", "maxLength": 1000}
+  },
+  "additionalProperties": false
+}

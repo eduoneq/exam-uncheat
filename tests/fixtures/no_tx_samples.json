@@ -1,0 +1,10 @@
+{
+ "a.c": "esp_wifi_80211_tx(WIFI_IF_STA, buf, len, true);",
+ "b.c": "dp.passive = 0;",
+ "c.py": "sendp(RadioTap()/Dot11Deauth(), iface='wlan0mon')",
+ "d.sh": "hackrf_transfer -t noise.bin -f 2437000000",
+ "e.py": "def start_jammer(): pass\nstart_jammer()",
+ "f.c": "ble_gap_adv_start(0, NULL, BLE_HS_FOREVER, &p, cb, NULL);",
+ "g.c": "esp_wifi_scan_start(&cfg, false);",
+ "h.py": "subprocess.run(['aireplay-ng', '--deauth', '10', 'wlan0mon'])"
+}

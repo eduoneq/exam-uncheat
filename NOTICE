@@ -1,0 +1,17 @@
+exam-uncheat
+Copyright 2026 EDUONEQ and contributors
+
+Licensing
+- Source code (src/, firmware/, tools/, tests/): Apache License 2.0 (LICENSE)
+- Signature database (signatures/) and documentation (docs/, *.md):
+  Creative Commons Attribution 4.0 International (LICENSE-CC-BY-4.0.txt)
+
+Third-party facts and references
+- Bluetooth company identifiers and 16-bit member UUIDs are factual values taken from
+  the Bluetooth SIG Assigned Numbers registry
+  (https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/).
+- The idea of combining company ID + payload string + name checks follows the
+  design described by Spectacle (MIT, https://github.com/kevinl95/Spectacle).
+  No Spectacle code is included.
+- No code or data files from AGPL/GPL projects (e.g. Nearby Glasses, ESP-GlassHole,
+  Kismet) are included in this repository.

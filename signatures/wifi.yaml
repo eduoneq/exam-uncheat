@@ -1,0 +1,60 @@
+schema: exam-uncheat.signature/v1
+license: CC-BY-4.0
+signatures:
+  - id: wifi.direct_group
+    name: "Wi-Fi Direct(P2P) 그룹 (SSID DIRECT-xy… 또는 P2P IE)"
+    category: wifi_direct
+    match:
+      kind: [wifi.beacon, wifi.probe_req, wifi.p2p]
+      any:
+        - {field: attrs.ssid, prefix: "DIRECT-"}
+        - {field: attrs.p2p_ie, eq: true}
+        - {field: attrs.is_p2p_go, eq: true}
+    confidence: low
+    weight: 25
+    notes:
+      - "Android 문서: Wi-Fi Direct 그룹 네트워크 이름은 'DIRECT-xy'로 시작"
+      - "프린터·TV·화면 미러링도 사용 — 빈 교실 기준선과 비교 필수"
+      - "스마트안경 미디어 전송·라이브뷰가 Wi-Fi Direct를 쓴다는 비공식 역분석 자료가 있음(가설)"
+    spoofable: true
+    sources:
+      - https://developer.android.com/reference/android/net/wifi/p2p/WifiP2pConfig.Builder
+      - https://visor.macedonga.com/protocol/radios-and-links/
+    last_verified: "2026-11-17"
+    verified_by: literature
+
+  - id: wifi.hotspot.iphone_name
+    name: "iPhone/iPad 개인용 핫스팟 (SSID = 기기 이름)"
+    category: phone_hotspot
+    vendor: "Apple"
+    match:
+      kind: wifi.beacon
+      all:
+        - {field: attrs.ssid, regex: "(?i)(iphone|ipad)"}
+    confidence: low
+    weight: 30
+    notes:
+      - "Apple 지원 문서: 핫스팟은 제공 기기의 이름으로 Wi-Fi 목록에 표시됨. 기본 기기 이름에 iPhone/iPad가 들어가는 경우가 많음"
+      - "이름을 바꾸면 놓침. SSID 원문은 저장 시 가린다"
+    spoofable: true
+    sources:
+      - https://support.apple.com/en-us/111785
+    last_verified: "2026-11-17"
+    verified_by: heuristic
+
+  - id: wifi.hotspot.android_name
+    name: "Android 휴대폰 핫스팟 이름 패턴 (Galaxy / AndroidAP 등)"
+    category: phone_hotspot
+    match:
+      kind: wifi.beacon
+      all:
+        - {field: attrs.ssid, regex: "(?i)(galaxy|androidap|android_?hotspot|pixel)"}
+    confidence: low
+    weight: 25
+    notes:
+      - "제조사 기본 핫스팟 이름 관행 기반 휴리스틱. 아래 출처는 Android 핫스팟 개념 문서일 뿐 이름 패턴의 근거가 아님 — 제조사 기본값 확인 및 현장 데이터 보정 필요"
+    spoofable: true
+    sources:
+      - https://developer.android.com/develop/connectivity/wifi/localonlyhotspot
+    last_verified: "2026-11-17"
+    verified_by: heuristic

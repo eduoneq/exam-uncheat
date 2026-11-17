@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>exam-uncheat 감독관 콘솔</title>
+<style>
+  :root{--u:#c0392b;--c:#e67e22;--i:#7f8c8d}
+  body{font-family:system-ui,"Noto Sans KR",sans-serif;margin:0;background:#f6f7f9;color:#111}
+  header{background:#1f2937;color:#fff;padding:10px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  header b{font-size:18px} .pill{background:#374151;border-radius:12px;padding:2px 10px;font-size:13px}
+  main{padding:12px 16px;max-width:1100px;margin:auto}
+  .notice{background:#fff4e5;border-left:4px solid #e69500;padding:8px 12px;margin-bottom:12px;font-size:14px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+  input,select{padding:6px;border:1px solid #ccc;border-radius:6px}
+  button{padding:7px 12px;border:0;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
+  button.sec{background:#6b7280} button.warn{background:#b91c1c}
+  .card{background:#fff;border-radius:10px;padding:12px;margin:10px 0;box-shadow:0 1px 3px #0002;border-left:6px solid var(--i)}
+  .card.urgent{border-left-color:var(--u)} .card.check{border-left-color:var(--c)}
+  .lvl{font-weight:700} .urgent .lvl{color:var(--u)} .check .lvl{color:var(--c)} .info .lvl{color:var(--i)}
+  .meta{color:#555;font-size:13px} ul{margin:6px 0 6px 18px;padding:0}
+  .done{opacity:.6}
+  details{margin-top:6px} label{font-size:13px;margin-right:10px}
+</style>
+</head>
+<body>
+<header>
+  <b>exam-uncheat 감독관 콘솔</b>
+  <span class="pill" id="phase">세션 없음</span>
+  <span class="pill" id="counts"></span>
+  <span class="pill" id="sensors"></span>
+</header>
+<main>
+  <div class="notice">이 화면의 단서는 <b>감독관 판단을 돕는 참고 정보</b>입니다. 부정행위를 판정하지 않습니다.
+    신호만으로 수험생을 지목하지 말고, 반드시 육안 확인 절차를 따르세요.</div>
+
+  <section id="setup">
+    <div class="row">
+      <input id="exam" placeholder="시험명">
+      <input id="site" placeholder="시험장">
+      <input id="room" placeholder="고사실" size="6">
+      <input id="period" placeholder="교시" size="4">
+      <button onclick="startSession()">① 세션 시작 (빈 교실 기준선 측정)</button>
+      <button onclick="startExam()">② 시험 시작 (기준선 확정)</button>
+      <button class="warn" onclick="closeSession()">③ 세션 종료 · 보고서 생성</button>
+    </div>
+    <div class="row">
+      <a href="/api/v1/report.html" target="_blank">보고서(HTML/인쇄→PDF)</a> ·
+      <a href="/api/v1/report.md" target="_blank">보고서(Markdown)</a> ·
+      <a href="/api/v1/verify" target="_blank">무결성 검증</a>
+    </div>
+    <details><summary>상용 탐지기 경보 수동 기록</summary>
+      <div class="row">
+        <input id="mvendor" placeholder="탐지기 제조사/모델">
+        <input id="mnote" placeholder="표시 내용 / 위치" size="40">
+        <button class="sec" onclick="manual()">기록</button>
+      </div>
+    </details>
+  </section>
+
+  <div id="msg" class="meta"></div>
+  <section id="clues"></section>
+</main>
+<script>
+const LV={urgent:"즉시 확인 권장",check:"확인 권장",info:"참고"};
+const DEC={confirmed_device:"기기 확인함",false_positive:"오탐",needs_more_check:"추가 확인",no_action:"조치 없음"};
+const CHECK=["안경 다리 두께·버튼 확인","렌즈 옆 카메라·LED 확인","귀 안쪽 이어폰 확인","안경 책상 위 검사 요청","소지품·가방 위치 확인"];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function api(path,body){
+  const r=await fetch(path,{method:body===undefined?"GET":"POST",headers:{"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){document.getElementById("msg").textContent="오류: "+(j.detail||r.status);throw j}
+  return j;
+}
+async function startSession(){const v=id=>document.getElementById(id).value;
+  await api("/api/v1/session/start",{exam:v("exam"),site:v("site"),room:v("room"),period:v("period")});
+  document.getElementById("msg").textContent="기준선 측정 중: 수험생 입실 전 빈 교실에서 2~5분 유지하세요.";refresh()}
+async function startExam(){const j=await api("/api/v1/session/exam",{});
+  document.getElementById("msg").textContent="기준선 확정: 신호 묶음 "+j.baseline.groups+"개";refresh()}
+async function closeSession(){if(!confirm("세션을 종료하고 보고서를 생성할까요?"))return;
+  const j=await api("/api/v1/session/close",{});
+  document.getElementById("msg").textContent="종료됨. 무결성 검증: "+(j.verify.ok?"정상":"실패");refresh()}
+async function manual(){await api("/api/v1/manual-alert",{vendor:document.getElementById("mvendor").value,note:document.getElementById("mnote").value});refresh()}
+async function decide(id,d){
+  const box=document.getElementById("cl-"+id);
+  const checklist=[...box.querySelectorAll("input[type=checkbox]:checked")].map(x=>x.value);
+  const note=box.querySelector(".note").value;
+  await api("/api/v1/actions",{clue_id:id,decision:d,actor_role:"proctor",checklist,note});
+  box.querySelector("details.act").open=false;refresh();
+}
+async function refresh(){
+  const st=await api("/api/v1/status");const s=st.session;
+  document.getElementById("phase").textContent=s?(s.closed?"종료됨":(s.phase==="baseline"?"기준선 측정 중":"시험 중")):"세션 없음";
+  document.getElementById("counts").textContent=s?`즉시 ${s.clue_counts.urgent} · 확인 ${s.clue_counts.check} · 참고 ${s.clue_counts.info}`:"";
+  document.getElementById("sensors").textContent=s?`센서 ${Object.keys(s.sensors).length}대 · 수신 ${s.accepted}`:"";
+  if(document.querySelector("details.act[open]"))return; // don't wipe a form being filled in
+  const clues=await api("/api/v1/clues");
+  const open=new Set();
+  document.getElementById("clues").innerHTML=clues.map(c=>{
+    const last=c.decisions.length?c.decisions[c.decisions.length-1]:null;
+    return `<div class="card ${c.level} ${last?"done":""}" id="cl-${esc(c.clue_id)}">
+      <div><span class="lvl">${LV[c.level]}</span> · <b>${esc(c.title)}</b> <span class="meta">${esc(c.clue_id)} · ${esc(c.ts_first.slice(11,19))}–${esc(c.ts_last.slice(11,19))} · 최고 ${c.max_rssi??"-"} dBm · 구역 ${esc(c.zones.join(",")||"-")}</span></div>
+      <ul>${c.reasons.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>
+      ${c.signature_ids.length?`<div class="meta">시그니처: ${c.signature_ids.map(esc).join(", ")}</div>`:""}
+      ${last?`<div class="meta">감독관 판단: <b>${DEC[last.decision]}</b> ${esc(last.note||"")}</div>`:""}
+      <details class="act" data-id="${esc(c.clue_id)}" ${open.has(c.clue_id)?"open":""}><summary>확인·조치 기록</summary>
+        <div>${CHECK.map(x=>`<label><input type="checkbox" value="${esc(x)}">${esc(x)}</label>`).join("")}</div>
+        <div class="row"><input class="note" placeholder="메모 (실명·수험번호 입력 금지)" size="50">
+        ${Object.entries(DEC).map(([k,v])=>`<button class="sec" onclick="decide('${esc(c.clue_id)}','${k}')">${v}</button>`).join("")}</div>
+      </details></div>`}).join("")||'<p class="meta">단서 없음</p>';
+}
+refresh();setInterval(refresh,2000);
+</script>
+</body>
+</html>
