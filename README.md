@@ -50,7 +50,7 @@
 <p align="center">
   <img src="docs/img/console.png" alt="감독관 콘솔 데스크톱 화면. 시뮬레이션 데이터에서 스마트안경 신호가 즉시 확인 단서로 올라와 있고 확인 체크리스트가 펼쳐져 있다." width="74%">
   &nbsp;
-  <img src="docs/img/console-mobile.png" alt="감독관 콘솔 휴대폰 화면. 단서 목록이 맨 위에 있다." width="22%">
+  <img src="docs/img/console-mobile.png" alt="감독관 콘솔 휴대폰 화면. 시험 중에는 단서 목록이 세션 설정보다 먼저 나온다." width="22%">
 </p>
 <p align="center"><sub>시뮬레이션 데이터로 찍은 v0.1 화면입니다. 단서는 참고 정보이고 신호만으로 수험생을 지목하지 않습니다.</sub></p>
 

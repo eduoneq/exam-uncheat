@@ -44,7 +44,7 @@ The same event format works for a cheap ESP32 board, a BLE sniffer, a monitor-mo
 <p align="center">
   <img src="docs/img/console.png" alt="Proctor console on a laptop. A smart-glasses signal from simulated data is flagged for an immediate check, with the checklist open." width="74%">
   &nbsp;
-  <img src="docs/img/console-mobile.png" alt="Proctor console on a phone, with the clue list first." width="22%">
+  <img src="docs/img/console-mobile.png" alt="Proctor console on a phone. During an exam the clue list comes before session setup." width="22%">
 </p>
 <p align="center"><sub>v0.1 with simulated data. The interface is in Korean. A clue is a prompt to check, not a verdict.</sub></p>
 
