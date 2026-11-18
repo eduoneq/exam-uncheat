@@ -2,4 +2,4 @@ blank_issues_enabled: true
 contact_links:
   - name: 보안 취약점 제보
     url: https://github.com/eduoneq/exam-uncheat/security/advisories/new
-    about: 공개 이슈로 올리지 마세요. GitHub Security Advisories로 알려 주세요.
+    about: 공개 이슈 대신 GitHub Security Advisories로 비공개 제보해 주세요.

@@ -3,111 +3,266 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>exam-uncheat 감독관 콘솔</title>
+<meta name="color-scheme" content="light">
+<title>감독관 콘솔 · exam-uncheat</title>
 <style>
-  :root{--u:#c0392b;--c:#e67e22;--i:#7f8c8d}
-  body{font-family:system-ui,"Noto Sans KR",sans-serif;margin:0;background:#f6f7f9;color:#111}
-  header{background:#1f2937;color:#fff;padding:10px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-  header b{font-size:18px} .pill{background:#374151;border-radius:12px;padding:2px 10px;font-size:13px}
-  main{padding:12px 16px;max-width:1100px;margin:auto}
-  .notice{background:#fff4e5;border-left:4px solid #e69500;padding:8px 12px;margin-bottom:12px;font-size:14px}
-  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
-  input,select{padding:6px;border:1px solid #ccc;border-radius:6px}
-  button{padding:7px 12px;border:0;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
-  button.sec{background:#6b7280} button.warn{background:#b91c1c}
-  .card{background:#fff;border-radius:10px;padding:12px;margin:10px 0;box-shadow:0 1px 3px #0002;border-left:6px solid var(--i)}
-  .card.urgent{border-left-color:var(--u)} .card.check{border-left-color:var(--c)}
-  .lvl{font-weight:700} .urgent .lvl{color:var(--u)} .check .lvl{color:var(--c)} .info .lvl{color:var(--i)}
-  .meta{color:#555;font-size:13px} ul{margin:6px 0 6px 18px;padding:0}
-  .done{opacity:.6}
-  details{margin-top:6px} label{font-size:13px;margin-right:10px}
+:root{
+  --brand:#003aab; --brand-600:#0a49c4; --brand-50:#eef4fd; --brand-100:#dbe7fa;
+  --ink:#0b1a33; --ink-2:#3f5578; --ink-3:#6b7f9f;
+  --line:#dfe6f1; --line-2:#c9d5e6; --surface:#ffffff; --canvas:#f5f8fc;
+  --urgent:#b42318; --urgent-bg:#fdf1f0; --check:#a15c07; --check-bg:#fdf6ec; --info:#55688a;
+  --ok:#1d7a46;
+  --r:10px; --r-sm:7px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --fs-xs:12px; --fs-sm:13px; --fs-md:15px; --fs-lg:17px; --fs-xl:21px;
+  --font:"Pretendard","Pretendard Variable","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);font:400 var(--fs-md)/1.55 var(--font);letter-spacing:-0.005em;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+::selection{background:var(--brand-100);color:var(--ink)}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
+a{color:var(--brand);text-underline-offset:3px;text-decoration-thickness:1px}
+a:hover{color:var(--brand-600)}
+.num{font-variant-numeric:tabular-nums}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:10px;border:3px solid var(--canvas)}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1120px;margin:0 auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:var(--s3);margin-right:auto;min-width:0}
+.brand .wm{height:14px;width:auto;display:block}
+.brand span{font-size:var(--fs-sm);color:var(--ink-2);font-weight:500;white-space:nowrap;padding-left:var(--s3);border-left:1px solid var(--line)}
+.status{display:flex;align-items:center;gap:var(--s4);font-size:var(--fs-sm);color:var(--ink-2);flex-wrap:wrap}
+.phase{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink)}
+.phase i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
+.phase[data-p="baseline"] i{background:var(--check)}
+.phase[data-p="exam"] i{background:var(--ok);box-shadow:0 0 0 3px #1d7a461f}
+.phase[data-p="closed"] i{background:var(--ink-3)}
+.status .sep{width:1px;height:14px;background:var(--line)}
+
+main{max-width:1120px;margin:0 auto;padding:var(--s5) var(--s5) var(--s7)}
+.note{display:flex;gap:var(--s2);align-items:flex-start;color:var(--ink-2);font-size:var(--fs-sm);margin:0 0 var(--s5);max-width:75ch}
+.note svg{flex:none;margin-top:2px}
+
+.layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:var(--s5);align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--s5)}
+.panel h2,.feed h2{font-size:var(--fs-lg);font-weight:700;letter-spacing:-0.02em;margin:0 0 var(--s4)}
+.side{position:sticky;top:76px;display:flex;flex-direction:column;gap:var(--s4)}
+
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.fields label{display:flex;flex-direction:column;gap:6px;font-size:var(--fs-xs);color:var(--ink-2);font-weight:500}
+.fields label.wide{grid-column:1/-1}
+input[type=text]{font:inherit;font-size:var(--fs-md);color:var(--ink);background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:9px 11px;min-width:0;width:100%}
+input[type=text]::placeholder{color:#8a9ab5}
+input[type=text]:hover{border-color:#a9b9d1}
+input[type=text]:disabled{background:var(--canvas);color:var(--ink-2);border-color:var(--line)}
+input[type=text]:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px #003aab22}
+input[type=checkbox]{accent-color:var(--brand);width:16px;height:16px;margin:0}
+
+.steps{list-style:none;margin:var(--s5) 0 0;padding:0;display:flex;flex-direction:column;gap:var(--s2)}
+.steps li{display:grid;grid-template-columns:24px 1fr;gap:var(--s3);align-items:start}
+.steps .n{width:24px;height:24px;border-radius:50%;border:1px solid var(--line-2);color:var(--ink-2);font-size:var(--fs-xs);font-weight:600;display:grid;place-items:center;margin-top:7px}
+.steps li.on .n{background:var(--brand);border-color:var(--brand);color:#fff}
+.steps li.done .n{background:var(--brand-50);border-color:var(--brand-100);color:var(--brand)}
+.steps small{display:block;color:var(--ink-3);font-size:var(--fs-xs);margin-top:4px;line-height:1.45}
+
+button{font:inherit;font-size:var(--fs-sm);font-weight:600;cursor:pointer;border-radius:var(--r-sm);padding:9px 14px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);transition:background .15s,border-color .15s,color .15s;width:100%;text-align:left}
+button:hover{background:var(--brand-50);border-color:#a9b9d1}
+button:disabled{opacity:.45;cursor:not-allowed;background:var(--surface)}
+button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+button.primary:hover{background:var(--brand-600)}
+button.end{color:var(--urgent)}
+button.end:hover{background:var(--urgent-bg);border-color:#efc4bf}
+
+.links{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);font-size:var(--fs-sm)}
+details.manual summary,details.act summary{cursor:pointer;font-size:var(--fs-sm);font-weight:600;color:var(--ink);list-style:none;display:flex;align-items:center;gap:6px}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .15s;margin-right:4px}
+details[open] summary::before{transform:rotate(45deg)}
+.manual .fields{margin-top:var(--s3)}
+.manual button{margin-top:var(--s3)}
+.msg{font-size:var(--fs-sm);color:var(--ink-2);min-height:1.5em;margin:0}
+.msg.err{color:var(--urgent)}
+
+/* feed */
+.feed-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s3);flex-wrap:wrap;margin-bottom:var(--s3)}
+.feed-head h2{margin:0}
+.tally{display:flex;gap:var(--s4);font-size:var(--fs-sm);color:var(--ink-2)}
+.tally b{color:var(--ink);font-weight:700}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.clue{padding:var(--s4) var(--s5);border-top:1px solid var(--line)}
+.clue:first-child{border-top:0}
+.clue.urgent:not(.done){background:#fffbfa}
+.clue-h{display:flex;align-items:baseline;gap:var(--s3);flex-wrap:wrap}
+.lvl{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-xs);font-weight:700;letter-spacing:0;white-space:nowrap}
+.lvl i{width:8px;height:8px;border-radius:2px;background:currentColor}
+.urgent .lvl{color:var(--urgent)} .check .lvl{color:var(--check)} .info .lvl{color:var(--info)}
+.clue h3{margin:0;font-size:var(--fs-md);font-weight:700;letter-spacing:-0.015em;flex:1 1 220px;min-width:0}
+.meta{color:var(--ink-3);font-size:var(--fs-xs);display:flex;flex-wrap:wrap;gap:2px var(--s3);margin-top:6px}
+.reasons{margin:var(--s2) 0 0;padding-left:1.1em;color:var(--ink-2);font-size:var(--fs-sm);max-width:75ch}
+.reasons li{margin:2px 0}
+.sigs{font-size:var(--fs-xs);color:var(--ink-3);margin-top:6px;word-break:break-all;overflow-wrap:anywhere}
+.decided{margin-top:var(--s3);font-size:var(--fs-sm);color:var(--ink-2);display:flex;gap:6px;align-items:center}
+.decided svg{flex:none}
+.clue.done h3,.clue.done .reasons{color:var(--ink-3)}
+details.act{margin-top:var(--s3)}
+details.act summary{color:var(--brand)}
+.act-body{margin-top:var(--s3);padding:var(--s4);background:var(--canvas);border-radius:var(--r-sm)}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:var(--s2) var(--s4);font-size:var(--fs-sm)}
+.checks label{display:flex;gap:var(--s2);align-items:center;color:var(--ink)}
+.act-body input[type=text]{margin-top:var(--s3)}
+.decide{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s3)}
+.decide button{width:auto;text-align:center}
+.empty{padding:var(--s7) var(--s5);text-align:center;color:var(--ink-3);font-size:var(--fs-sm)}
+.empty b{display:block;color:var(--ink);font-size:var(--fs-md);margin-bottom:4px}
+
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  .side{position:static}
+  body.live .feed{order:-1}
+}
+@media (max-width:520px){
+  .top-in{padding:var(--s3) var(--s4);gap:var(--s2)}
+  .brand span{display:none}
+  .status{gap:var(--s3);width:100%}
+  main{padding:var(--s4) var(--s4) var(--s7)}
+  .panel{padding:var(--s4)}
+  .clue{padding:var(--s4)}
+  .decide button{flex:1 1 calc(50% - var(--s2))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<header>
-  <b>exam-uncheat 감독관 콘솔</b>
-  <span class="pill" id="phase">세션 없음</span>
-  <span class="pill" id="counts"></span>
-  <span class="pill" id="sensors"></span>
-</header>
+<header class="top"><div class="top-in">
+  <div class="brand"><svg class="wm" xmlns="http://www.w3.org/2000/svg" width="214" height="17" viewBox="0 0 213.6 16.8" role="img" aria-label="exam-uncheat"><title>EXAM-UNCHEAT</title><path fill="#2a6fdc" d="M0.0 0.0h2.1v2.1h-2.1zM2.4 0.0h2.1v2.1h-2.1zM4.8 0.0h2.1v2.1h-2.1zM7.2 0.0h2.1v2.1h-2.1zM9.6 0.0h2.1v2.1h-2.1zM12.0 0.0h2.1v2.1h-2.1zM16.8 0.0h2.1v2.1h-2.1zM19.2 0.0h2.1v2.1h-2.1zM28.8 0.0h2.1v2.1h-2.1zM31.2 0.0h2.1v2.1h-2.1zM38.4 0.0h2.1v2.1h-2.1zM40.8 0.0h2.1v2.1h-2.1zM43.2 0.0h2.1v2.1h-2.1zM45.6 0.0h2.1v2.1h-2.1zM48.0 0.0h2.1v2.1h-2.1zM55.2 0.0h2.1v2.1h-2.1zM57.6 0.0h2.1v2.1h-2.1zM67.2 0.0h2.1v2.1h-2.1zM69.6 0.0h2.1v2.1h-2.1zM86.4 0.0h2.1v2.1h-2.1zM88.8 0.0h2.1v2.1h-2.1zM98.4 0.0h2.1v2.1h-2.1zM100.8 0.0h2.1v2.1h-2.1zM105.6 0.0h2.1v2.1h-2.1zM108.0 0.0h2.1v2.1h-2.1zM117.6 0.0h2.1v2.1h-2.1zM120.0 0.0h2.1v2.1h-2.1zM127.2 0.0h2.1v2.1h-2.1zM129.6 0.0h2.1v2.1h-2.1zM132.0 0.0h2.1v2.1h-2.1zM134.4 0.0h2.1v2.1h-2.1zM136.8 0.0h2.1v2.1h-2.1zM139.2 0.0h2.1v2.1h-2.1zM144.0 0.0h2.1v2.1h-2.1zM146.4 0.0h2.1v2.1h-2.1zM156.0 0.0h2.1v2.1h-2.1zM158.4 0.0h2.1v2.1h-2.1zM163.2 0.0h2.1v2.1h-2.1zM165.6 0.0h2.1v2.1h-2.1zM168.0 0.0h2.1v2.1h-2.1zM170.4 0.0h2.1v2.1h-2.1zM172.8 0.0h2.1v2.1h-2.1zM175.2 0.0h2.1v2.1h-2.1zM182.4 0.0h2.1v2.1h-2.1zM184.8 0.0h2.1v2.1h-2.1zM187.2 0.0h2.1v2.1h-2.1zM189.6 0.0h2.1v2.1h-2.1zM192.0 0.0h2.1v2.1h-2.1zM199.2 0.0h2.1v2.1h-2.1zM201.6 0.0h2.1v2.1h-2.1zM204.0 0.0h2.1v2.1h-2.1zM206.4 0.0h2.1v2.1h-2.1zM208.8 0.0h2.1v2.1h-2.1zM211.2 0.0h2.1v2.1h-2.1z"/><path fill="#2364d2" d="M0.0 2.4h2.1v2.1h-2.1zM2.4 2.4h2.1v2.1h-2.1zM16.8 2.4h2.1v2.1h-2.1zM19.2 2.4h2.1v2.1h-2.1zM28.8 2.4h2.1v2.1h-2.1zM31.2 2.4h2.1v2.1h-2.1zM36.0 2.4h2.1v2.1h-2.1zM38.4 2.4h2.1v2.1h-2.1zM48.0 2.4h2.1v2.1h-2.1zM50.4 2.4h2.1v2.1h-2.1zM55.2 2.4h2.1v2.1h-2.1zM57.6 2.4h2.1v2.1h-2.1zM60.0 2.4h2.1v2.1h-2.1zM64.8 2.4h2.1v2.1h-2.1zM67.2 2.4h2.1v2.1h-2.1zM69.6 2.4h2.1v2.1h-2.1zM86.4 2.4h2.1v2.1h-2.1zM88.8 2.4h2.1v2.1h-2.1zM98.4 2.4h2.1v2.1h-2.1zM100.8 2.4h2.1v2.1h-2.1zM105.6 2.4h2.1v2.1h-2.1zM108.0 2.4h2.1v2.1h-2.1zM110.4 2.4h2.1v2.1h-2.1zM117.6 2.4h2.1v2.1h-2.1zM120.0 2.4h2.1v2.1h-2.1zM124.8 2.4h2.1v2.1h-2.1zM127.2 2.4h2.1v2.1h-2.1zM144.0 2.4h2.1v2.1h-2.1zM146.4 2.4h2.1v2.1h-2.1zM156.0 2.4h2.1v2.1h-2.1zM158.4 2.4h2.1v2.1h-2.1zM163.2 2.4h2.1v2.1h-2.1zM165.6 2.4h2.1v2.1h-2.1zM180.0 2.4h2.1v2.1h-2.1zM182.4 2.4h2.1v2.1h-2.1zM192.0 2.4h2.1v2.1h-2.1zM194.4 2.4h2.1v2.1h-2.1zM204.0 2.4h2.1v2.1h-2.1zM206.4 2.4h2.1v2.1h-2.1z"/><path fill="#1c59c8" d="M0.0 4.8h2.1v2.1h-2.1zM2.4 4.8h2.1v2.1h-2.1zM19.2 4.8h2.1v2.1h-2.1zM21.6 4.8h2.1v2.1h-2.1zM26.4 4.8h2.1v2.1h-2.1zM28.8 4.8h2.1v2.1h-2.1zM36.0 4.8h2.1v2.1h-2.1zM38.4 4.8h2.1v2.1h-2.1zM48.0 4.8h2.1v2.1h-2.1zM50.4 4.8h2.1v2.1h-2.1zM55.2 4.8h2.1v2.1h-2.1zM57.6 4.8h2.1v2.1h-2.1zM60.0 4.8h2.1v2.1h-2.1zM62.4 4.8h2.1v2.1h-2.1zM64.8 4.8h2.1v2.1h-2.1zM67.2 4.8h2.1v2.1h-2.1zM69.6 4.8h2.1v2.1h-2.1zM86.4 4.8h2.1v2.1h-2.1zM88.8 4.8h2.1v2.1h-2.1zM98.4 4.8h2.1v2.1h-2.1zM100.8 4.8h2.1v2.1h-2.1zM105.6 4.8h2.1v2.1h-2.1zM108.0 4.8h2.1v2.1h-2.1zM110.4 4.8h2.1v2.1h-2.1zM112.8 4.8h2.1v2.1h-2.1zM117.6 4.8h2.1v2.1h-2.1zM120.0 4.8h2.1v2.1h-2.1zM124.8 4.8h2.1v2.1h-2.1zM127.2 4.8h2.1v2.1h-2.1zM144.0 4.8h2.1v2.1h-2.1zM146.4 4.8h2.1v2.1h-2.1zM156.0 4.8h2.1v2.1h-2.1zM158.4 4.8h2.1v2.1h-2.1zM163.2 4.8h2.1v2.1h-2.1zM165.6 4.8h2.1v2.1h-2.1zM180.0 4.8h2.1v2.1h-2.1zM182.4 4.8h2.1v2.1h-2.1zM192.0 4.8h2.1v2.1h-2.1zM194.4 4.8h2.1v2.1h-2.1zM204.0 4.8h2.1v2.1h-2.1zM206.4 4.8h2.1v2.1h-2.1z"/><path fill="#154ebe" d="M0.0 7.2h2.1v2.1h-2.1zM2.4 7.2h2.1v2.1h-2.1zM4.8 7.2h2.1v2.1h-2.1zM7.2 7.2h2.1v2.1h-2.1zM9.6 7.2h2.1v2.1h-2.1zM21.6 7.2h2.1v2.1h-2.1zM24.0 7.2h2.1v2.1h-2.1zM26.4 7.2h2.1v2.1h-2.1zM36.0 7.2h2.1v2.1h-2.1zM38.4 7.2h2.1v2.1h-2.1zM40.8 7.2h2.1v2.1h-2.1zM43.2 7.2h2.1v2.1h-2.1zM45.6 7.2h2.1v2.1h-2.1zM48.0 7.2h2.1v2.1h-2.1zM50.4 7.2h2.1v2.1h-2.1zM55.2 7.2h2.1v2.1h-2.1zM57.6 7.2h2.1v2.1h-2.1zM62.4 7.2h2.1v2.1h-2.1zM67.2 7.2h2.1v2.1h-2.1zM69.6 7.2h2.1v2.1h-2.1zM74.4 7.2h2.1v2.1h-2.1zM76.8 7.2h2.1v2.1h-2.1zM79.2 7.2h2.1v2.1h-2.1zM81.6 7.2h2.1v2.1h-2.1zM86.4 7.2h2.1v2.1h-2.1zM88.8 7.2h2.1v2.1h-2.1zM98.4 7.2h2.1v2.1h-2.1zM100.8 7.2h2.1v2.1h-2.1zM105.6 7.2h2.1v2.1h-2.1zM108.0 7.2h2.1v2.1h-2.1zM112.8 7.2h2.1v2.1h-2.1zM115.2 7.2h2.1v2.1h-2.1zM117.6 7.2h2.1v2.1h-2.1zM120.0 7.2h2.1v2.1h-2.1zM124.8 7.2h2.1v2.1h-2.1zM127.2 7.2h2.1v2.1h-2.1zM144.0 7.2h2.1v2.1h-2.1zM146.4 7.2h2.1v2.1h-2.1zM148.8 7.2h2.1v2.1h-2.1zM151.2 7.2h2.1v2.1h-2.1zM153.6 7.2h2.1v2.1h-2.1zM156.0 7.2h2.1v2.1h-2.1zM158.4 7.2h2.1v2.1h-2.1zM163.2 7.2h2.1v2.1h-2.1zM165.6 7.2h2.1v2.1h-2.1zM168.0 7.2h2.1v2.1h-2.1zM170.4 7.2h2.1v2.1h-2.1zM172.8 7.2h2.1v2.1h-2.1zM180.0 7.2h2.1v2.1h-2.1zM182.4 7.2h2.1v2.1h-2.1zM184.8 7.2h2.1v2.1h-2.1zM187.2 7.2h2.1v2.1h-2.1zM189.6 7.2h2.1v2.1h-2.1zM192.0 7.2h2.1v2.1h-2.1zM194.4 7.2h2.1v2.1h-2.1zM204.0 7.2h2.1v2.1h-2.1zM206.4 7.2h2.1v2.1h-2.1z"/><path fill="#0e44b5" d="M0.0 9.6h2.1v2.1h-2.1zM2.4 9.6h2.1v2.1h-2.1zM19.2 9.6h2.1v2.1h-2.1zM21.6 9.6h2.1v2.1h-2.1zM26.4 9.6h2.1v2.1h-2.1zM28.8 9.6h2.1v2.1h-2.1zM36.0 9.6h2.1v2.1h-2.1zM38.4 9.6h2.1v2.1h-2.1zM48.0 9.6h2.1v2.1h-2.1zM50.4 9.6h2.1v2.1h-2.1zM55.2 9.6h2.1v2.1h-2.1zM57.6 9.6h2.1v2.1h-2.1zM67.2 9.6h2.1v2.1h-2.1zM69.6 9.6h2.1v2.1h-2.1zM86.4 9.6h2.1v2.1h-2.1zM88.8 9.6h2.1v2.1h-2.1zM98.4 9.6h2.1v2.1h-2.1zM100.8 9.6h2.1v2.1h-2.1zM105.6 9.6h2.1v2.1h-2.1zM108.0 9.6h2.1v2.1h-2.1zM115.2 9.6h2.1v2.1h-2.1zM117.6 9.6h2.1v2.1h-2.1zM120.0 9.6h2.1v2.1h-2.1zM124.8 9.6h2.1v2.1h-2.1zM127.2 9.6h2.1v2.1h-2.1zM144.0 9.6h2.1v2.1h-2.1zM146.4 9.6h2.1v2.1h-2.1zM156.0 9.6h2.1v2.1h-2.1zM158.4 9.6h2.1v2.1h-2.1zM163.2 9.6h2.1v2.1h-2.1zM165.6 9.6h2.1v2.1h-2.1zM180.0 9.6h2.1v2.1h-2.1zM182.4 9.6h2.1v2.1h-2.1zM192.0 9.6h2.1v2.1h-2.1zM194.4 9.6h2.1v2.1h-2.1zM204.0 9.6h2.1v2.1h-2.1zM206.4 9.6h2.1v2.1h-2.1z"/><path fill="#073fb0" d="M0.0 12.0h2.1v2.1h-2.1zM2.4 12.0h2.1v2.1h-2.1zM16.8 12.0h2.1v2.1h-2.1zM19.2 12.0h2.1v2.1h-2.1zM28.8 12.0h2.1v2.1h-2.1zM31.2 12.0h2.1v2.1h-2.1zM36.0 12.0h2.1v2.1h-2.1zM38.4 12.0h2.1v2.1h-2.1zM48.0 12.0h2.1v2.1h-2.1zM50.4 12.0h2.1v2.1h-2.1zM55.2 12.0h2.1v2.1h-2.1zM57.6 12.0h2.1v2.1h-2.1zM67.2 12.0h2.1v2.1h-2.1zM69.6 12.0h2.1v2.1h-2.1zM86.4 12.0h2.1v2.1h-2.1zM88.8 12.0h2.1v2.1h-2.1zM98.4 12.0h2.1v2.1h-2.1zM100.8 12.0h2.1v2.1h-2.1zM105.6 12.0h2.1v2.1h-2.1zM108.0 12.0h2.1v2.1h-2.1zM117.6 12.0h2.1v2.1h-2.1zM120.0 12.0h2.1v2.1h-2.1zM124.8 12.0h2.1v2.1h-2.1zM127.2 12.0h2.1v2.1h-2.1zM144.0 12.0h2.1v2.1h-2.1zM146.4 12.0h2.1v2.1h-2.1zM156.0 12.0h2.1v2.1h-2.1zM158.4 12.0h2.1v2.1h-2.1zM163.2 12.0h2.1v2.1h-2.1zM165.6 12.0h2.1v2.1h-2.1zM180.0 12.0h2.1v2.1h-2.1zM182.4 12.0h2.1v2.1h-2.1zM192.0 12.0h2.1v2.1h-2.1zM194.4 12.0h2.1v2.1h-2.1zM204.0 12.0h2.1v2.1h-2.1zM206.4 12.0h2.1v2.1h-2.1z"/><path fill="#003aab" d="M0.0 14.4h2.1v2.1h-2.1zM2.4 14.4h2.1v2.1h-2.1zM4.8 14.4h2.1v2.1h-2.1zM7.2 14.4h2.1v2.1h-2.1zM9.6 14.4h2.1v2.1h-2.1zM12.0 14.4h2.1v2.1h-2.1zM16.8 14.4h2.1v2.1h-2.1zM19.2 14.4h2.1v2.1h-2.1zM28.8 14.4h2.1v2.1h-2.1zM31.2 14.4h2.1v2.1h-2.1zM36.0 14.4h2.1v2.1h-2.1zM38.4 14.4h2.1v2.1h-2.1zM48.0 14.4h2.1v2.1h-2.1zM50.4 14.4h2.1v2.1h-2.1zM55.2 14.4h2.1v2.1h-2.1zM57.6 14.4h2.1v2.1h-2.1zM67.2 14.4h2.1v2.1h-2.1zM69.6 14.4h2.1v2.1h-2.1zM88.8 14.4h2.1v2.1h-2.1zM91.2 14.4h2.1v2.1h-2.1zM93.6 14.4h2.1v2.1h-2.1zM96.0 14.4h2.1v2.1h-2.1zM98.4 14.4h2.1v2.1h-2.1zM105.6 14.4h2.1v2.1h-2.1zM108.0 14.4h2.1v2.1h-2.1zM117.6 14.4h2.1v2.1h-2.1zM120.0 14.4h2.1v2.1h-2.1zM127.2 14.4h2.1v2.1h-2.1zM129.6 14.4h2.1v2.1h-2.1zM132.0 14.4h2.1v2.1h-2.1zM134.4 14.4h2.1v2.1h-2.1zM136.8 14.4h2.1v2.1h-2.1zM139.2 14.4h2.1v2.1h-2.1zM144.0 14.4h2.1v2.1h-2.1zM146.4 14.4h2.1v2.1h-2.1zM156.0 14.4h2.1v2.1h-2.1zM158.4 14.4h2.1v2.1h-2.1zM163.2 14.4h2.1v2.1h-2.1zM165.6 14.4h2.1v2.1h-2.1zM168.0 14.4h2.1v2.1h-2.1zM170.4 14.4h2.1v2.1h-2.1zM172.8 14.4h2.1v2.1h-2.1zM175.2 14.4h2.1v2.1h-2.1zM180.0 14.4h2.1v2.1h-2.1zM182.4 14.4h2.1v2.1h-2.1zM192.0 14.4h2.1v2.1h-2.1zM194.4 14.4h2.1v2.1h-2.1zM204.0 14.4h2.1v2.1h-2.1zM206.4 14.4h2.1v2.1h-2.1z"/></svg><span>감독관 콘솔</span></div>
+  <div class="status" aria-live="polite">
+    <span class="phase" id="phase" data-p="none"><i></i><span>세션 없음</span></span>
+    <span class="sep" aria-hidden="true"></span>
+    <span id="sensors" class="num">센서 0대</span>
+  </div>
+</div></header>
+
 <main>
-  <div class="notice">이 화면의 단서는 <b>감독관 판단을 돕는 참고 정보</b>입니다. 부정행위를 판정하지 않습니다.
-    신호만으로 수험생을 지목하지 말고, 반드시 육안 확인 절차를 따르세요.</div>
+  <p class="note"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.3"/><path d="M8 7.2v4M8 4.8v.1" stroke-linecap="round"/></svg>
+  <span>여기 뜨는 단서는 감독관이 판단할 때 참고하는 정보이고, 부정행위를 판정하지 않습니다. 신호만 보고 수험생을 지목하지 말고 육안 확인 절차를 따라 주세요.</span></p>
 
-  <section id="setup">
-    <div class="row">
-      <input id="exam" placeholder="시험명">
-      <input id="site" placeholder="시험장">
-      <input id="room" placeholder="고사실" size="6">
-      <input id="period" placeholder="교시" size="4">
-      <button onclick="startSession()">① 세션 시작 (빈 교실 기준선 측정)</button>
-      <button onclick="startExam()">② 시험 시작 (기준선 확정)</button>
-      <button class="warn" onclick="closeSession()">③ 세션 종료 · 보고서 생성</button>
-    </div>
-    <div class="row">
-      <a href="/api/v1/report.html" target="_blank">보고서(HTML/인쇄→PDF)</a> ·
-      <a href="/api/v1/report.md" target="_blank">보고서(Markdown)</a> ·
-      <a href="/api/v1/verify" target="_blank">무결성 검증</a>
-    </div>
-    <details><summary>상용 탐지기 경보 수동 기록</summary>
-      <div class="row">
-        <input id="mvendor" placeholder="탐지기 제조사/모델">
-        <input id="mnote" placeholder="표시 내용 / 위치" size="40">
-        <button class="sec" onclick="manual()">기록</button>
+  <div class="layout">
+    <aside class="side">
+      <section class="panel" id="setup" aria-labelledby="h-session">
+        <h2 id="h-session">세션</h2>
+        <div class="fields">
+          <label class="wide">시험명<input type="text" id="exam" placeholder="예: 2학기 기말고사" autocomplete="off"></label>
+          <label class="wide">시험장<input type="text" id="site" placeholder="예: 본관" autocomplete="off"></label>
+          <label>고사실<input type="text" id="room" placeholder="301" autocomplete="off" inputmode="numeric"></label>
+          <label>교시<input type="text" id="period" placeholder="1" autocomplete="off" inputmode="numeric"></label>
+        </div>
+        <ol class="steps">
+          <li id="st1"><span class="n">1</span><div><button class="primary" id="b1" onclick="startSession()">세션 시작</button><small>수험생이 들어오기 전 빈 교실에서 2~5분 동안 기준선을 잽니다.</small></div></li>
+          <li id="st2"><span class="n">2</span><div><button id="b2" onclick="startExam()">시험 시작</button><small>기준선을 확정합니다. 리플레이에 시작 신호가 있으면 저절로 넘어갑니다.</small></div></li>
+          <li id="st3"><span class="n">3</span><div><button class="end" id="b3" onclick="closeSession()">세션 종료하고 보고서 만들기</button></div></li>
+        </ol>
+        <p class="msg" id="msg" role="status" style="margin-top:var(--s4)"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="h-out">
+        <h2 id="h-out">기록과 보고서</h2>
+        <div class="links">
+          <a href="/api/v1/report.html" target="_blank" rel="noopener">보고서 (인쇄용 HTML)</a>
+          <a href="/api/v1/report.md" target="_blank" rel="noopener">Markdown</a>
+          <a href="/api/v1/verify" target="_blank" rel="noopener">무결성 검증</a>
+        </div>
+      </section>
+
+      <section class="panel">
+        <details class="manual"><summary>상용 탐지기 경보 직접 기록</summary>
+          <div class="fields">
+            <label class="wide">탐지기 제조사·모델<input type="text" id="mvendor" placeholder="예: ACME RF-1" autocomplete="off"></label>
+            <label class="wide">표시 내용과 위치<input type="text" id="mnote" placeholder="예: 3단계 경보, 교실 뒤편" autocomplete="off"></label>
+          </div>
+          <button onclick="manual()">타임라인에 기록</button>
+        </details>
+      </section>
+    </aside>
+
+    <section class="feed" aria-labelledby="h-clues">
+      <div class="feed-head">
+        <h2 id="h-clues">단서</h2>
+        <div class="tally num" id="counts"></div>
       </div>
-    </details>
-  </section>
-
-  <div id="msg" class="meta"></div>
-  <section id="clues"></section>
+      <div class="list" id="clues"></div>
+    </section>
+  </div>
 </main>
 <script>
-const LV={urgent:"즉시 확인 권장",check:"확인 권장",info:"참고"};
+const LV={urgent:"즉시 확인",check:"확인 권장",info:"참고"};
 const DEC={confirmed_device:"기기 확인함",false_positive:"오탐",needs_more_check:"추가 확인",no_action:"조치 없음"};
-const CHECK=["안경 다리 두께·버튼 확인","렌즈 옆 카메라·LED 확인","귀 안쪽 이어폰 확인","안경 책상 위 검사 요청","소지품·가방 위치 확인"];
+const CHECK=["안경 다리 두께와 버튼","렌즈 옆 카메라·LED","귀 안쪽 이어폰","안경을 책상 위에 올려 확인","소지품과 가방 위치"];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=id=>document.getElementById(id);
+function say(t,err){const m=$("msg");m.textContent=t;m.classList.toggle("err",!!err)}
 async function api(path,body){
   const r=await fetch(path,{method:body===undefined?"GET":"POST",headers:{"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
-  if(!r.ok){document.getElementById("msg").textContent="오류: "+(j.detail||r.status);throw j}
+  if(!r.ok){say("요청이 처리되지 않았습니다: "+(j.detail||r.status),true);throw j}
   return j;
 }
-async function startSession(){const v=id=>document.getElementById(id).value;
+async function startSession(){const v=id=>$(id).value;
   await api("/api/v1/session/start",{exam:v("exam"),site:v("site"),room:v("room"),period:v("period")});
-  document.getElementById("msg").textContent="기준선 측정 중: 수험생 입실 전 빈 교실에서 2~5분 유지하세요.";refresh()}
+  say("기준선을 재는 중입니다. 빈 교실 상태로 2~5분 기다려 주세요.");refresh()}
 async function startExam(){const j=await api("/api/v1/session/exam",{});
-  document.getElementById("msg").textContent="기준선 확정: 신호 묶음 "+j.baseline.groups+"개";refresh()}
-async function closeSession(){if(!confirm("세션을 종료하고 보고서를 생성할까요?"))return;
+  say("기준선을 확정했습니다. 신호 묶음 "+j.baseline.groups+"개를 기준으로 비교합니다.");refresh()}
+async function closeSession(){if(!confirm("세션을 끝내고 보고서를 만들까요? 끝낸 세션은 다시 열 수 없습니다."))return;
   const j=await api("/api/v1/session/close",{});
-  document.getElementById("msg").textContent="종료됨. 무결성 검증: "+(j.verify.ok?"정상":"실패");refresh()}
-async function manual(){await api("/api/v1/manual-alert",{vendor:document.getElementById("mvendor").value,note:document.getElementById("mnote").value});refresh()}
+  say(j.verify.ok?"세션을 끝냈습니다. 원장 무결성 검증도 통과했습니다.":"세션을 끝냈지만 원장 무결성 검증에 실패했습니다. 보고서를 확인해 주세요.",!j.verify.ok);refresh()}
+async function manual(){await api("/api/v1/manual-alert",{vendor:$("mvendor").value,note:$("mnote").value});
+  $("mvendor").value="";$("mnote").value="";say("상용 탐지기 경보를 타임라인에 남겼습니다.");refresh()}
 async function decide(id,d){
-  const box=document.getElementById("cl-"+id);
+  const box=$("cl-"+id);
   const checklist=[...box.querySelectorAll("input[type=checkbox]:checked")].map(x=>x.value);
-  const note=box.querySelector(".note").value;
+  const note=box.querySelector(".note-in").value;
   await api("/api/v1/actions",{clue_id:id,decision:d,actor_role:"proctor",checklist,note});
   box.querySelector("details.act").open=false;refresh();
 }
+const CHK='<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function setSteps(s){
+  const p=!s?"none":s.closed?"closed":s.phase==="baseline"?"baseline":"exam";
+  const idx={none:1,baseline:2,exam:3,closed:4}[p];
+  [1,2,3].forEach(i=>{const li=$("st"+i);li.classList.toggle("on",i===idx);li.classList.toggle("done",i<idx);
+    $("b"+i).disabled=!(i===idx||(i===1&&p==="closed")||(i===3&&p==="baseline"));
+    $("b"+i).classList.toggle("primary",i===idx&&i!==3)});
+  if(p==="closed"){$("b1").classList.add("primary")}
+  const live=p==="baseline"||p==="exam";document.body.classList.toggle("live",live);
+  ["exam","site","room","period"].forEach(k=>{const el=$(k);el.disabled=live;if(s&&live&&document.activeElement!==el)el.value=(s.meta||{})[k]||""});
+  const ph=$("phase");ph.dataset.p=p;
+  ph.querySelector("span").textContent={none:"세션 없음",baseline:"기준선 측정 중",exam:"시험 진행 중",closed:"세션 종료"}[p];
+}
 async function refresh(){
   const st=await api("/api/v1/status");const s=st.session;
-  document.getElementById("phase").textContent=s?(s.closed?"종료됨":(s.phase==="baseline"?"기준선 측정 중":"시험 중")):"세션 없음";
-  document.getElementById("counts").textContent=s?`즉시 ${s.clue_counts.urgent} · 확인 ${s.clue_counts.check} · 참고 ${s.clue_counts.info}`:"";
-  document.getElementById("sensors").textContent=s?`센서 ${Object.keys(s.sensors).length}대 · 수신 ${s.accepted}`:"";
-  if(document.querySelector("details.act[open]"))return; // don't wipe a form being filled in
+  setSteps(s);
+  $("sensors").textContent=s?`센서 ${Object.keys(s.sensors).length}대 · 수신 ${s.accepted.toLocaleString("ko-KR")}건`:"센서 0대";
+  $("counts").innerHTML=s?`<span>즉시 확인 <b>${s.clue_counts.urgent}</b></span><span>확인 권장 <b>${s.clue_counts.check}</b></span><span>참고 <b>${s.clue_counts.info}</b></span>`:"";
+  if(document.querySelector("details.act[open]"))return; // keep a form that is being filled in
   const clues=await api("/api/v1/clues");
-  const open=new Set();
-  document.getElementById("clues").innerHTML=clues.map(c=>{
+  const order={urgent:0,check:1,info:2};
+  clues.sort((a,b)=>{const da=a.decisions.length?1:0,db=b.decisions.length?1:0;return da-db||order[a.level]-order[b.level]||(a.ts_first<b.ts_first?1:-1)});
+  $("clues").innerHTML=clues.map(c=>{
     const last=c.decisions.length?c.decisions[c.decisions.length-1]:null;
-    return `<div class="card ${c.level} ${last?"done":""}" id="cl-${esc(c.clue_id)}">
-      <div><span class="lvl">${LV[c.level]}</span> · <b>${esc(c.title)}</b> <span class="meta">${esc(c.clue_id)} · ${esc(c.ts_first.slice(11,19))}–${esc(c.ts_last.slice(11,19))} · 최고 ${c.max_rssi??"-"} dBm · 구역 ${esc(c.zones.join(",")||"-")}</span></div>
-      <ul>${c.reasons.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>
-      ${c.signature_ids.length?`<div class="meta">시그니처: ${c.signature_ids.map(esc).join(", ")}</div>`:""}
-      ${last?`<div class="meta">감독관 판단: <b>${DEC[last.decision]}</b> ${esc(last.note||"")}</div>`:""}
-      <details class="act" data-id="${esc(c.clue_id)}" ${open.has(c.clue_id)?"open":""}><summary>확인·조치 기록</summary>
-        <div>${CHECK.map(x=>`<label><input type="checkbox" value="${esc(x)}">${esc(x)}</label>`).join("")}</div>
-        <div class="row"><input class="note" placeholder="메모 (실명·수험번호 입력 금지)" size="50">
-        ${Object.entries(DEC).map(([k,v])=>`<button class="sec" onclick="decide('${esc(c.clue_id)}','${k}')">${v}</button>`).join("")}</div>
-      </details></div>`}).join("")||'<p class="meta">단서 없음</p>';
+    const id=esc(c.clue_id);
+    return `<article class="clue ${c.level} ${last?"done":""}" id="cl-${id}">
+      <div class="clue-h"><span class="lvl"><i></i>${LV[c.level]}</span><h3>${esc(c.title)}</h3></div>
+      <div class="meta num"><span>${esc(c.ts_first.slice(11,19))}–${esc(c.ts_last.slice(11,19))}</span><span>최고 ${c.max_rssi??"-"} dBm</span><span>구역 ${esc(c.zones.join(", ")||"-")}</span><span>${id}</span></div>
+      <ul class="reasons">${c.reasons.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>
+      ${c.signature_ids.length?`<div class="sigs">시그니처 ${c.signature_ids.map(esc).join(", ")}</div>`:""}
+      ${last?`<div class="decided">${CHK}<span>감독관 판단 <b>${DEC[last.decision]}</b>${last.note?" · "+esc(last.note):""}</span></div>`:""}
+      <details class="act"><summary>${last?"판단 다시 기록":"확인하고 기록하기"}</summary>
+        <div class="act-body">
+          <div class="checks">${CHECK.map(x=>`<label><input type="checkbox" value="${esc(x)}">${esc(x)}</label>`).join("")}</div>
+          <input type="text" class="note-in" placeholder="메모 (실명과 수험번호는 적지 마세요)" autocomplete="off">
+          <div class="decide">${Object.entries(DEC).map(([k,v])=>`<button onclick="decide('${id}','${k}')">${v}</button>`).join("")}</div>
+        </div>
+      </details></article>`}).join("")||`<div class="empty"><b>아직 단서가 없습니다</b>${s&&!s.closed?"새 신호가 기준선과 다르게 잡히면 여기에 나타납니다.":"세션을 시작하면 빈 교실 기준선부터 잽니다."}</div>`;
 }
 refresh();setInterval(refresh,2000);
 </script>

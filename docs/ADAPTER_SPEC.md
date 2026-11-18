@@ -1,11 +1,11 @@
 # exam-uncheat 어댑터 규격 (`exam-uncheat.event/v1`)
 
-어떤 장비든 아래 JSON을 한 줄에 하나씩 보내면 허브에 연결됩니다. 기계가 읽는 정의는 [`spec/event.schema.json`](../spec/event.schema.json).
+어떤 장비든 아래 JSON을 한 줄에 하나씩 보내면 허브에 붙일 수 있습니다. 기계가 읽는 정의는 [`spec/event.schema.json`](../spec/event.schema.json)에 있습니다.
 
 ## 1. 드라이버가 지켜야 할 것
-1. **수신만.** BLE 능동 스캔(SCAN_REQ), Wi-Fi 능동 스캔(프로브 송신), 광고, 연결, 프레임 주입, 재밍 금지. `tools/no_tx_check.py`가 CI에서 검사합니다.
-2. 데이터 프레임은 **페이로드를 버리고** 송신 주소·개수·바이트·RSSI만 보냅니다.
-3. 시작할 때 `hello`를 보내고 `tx_capable`을 정직하게 표시합니다. `tx_capable: true`인 센서는 허브가 거부합니다.
+1. 수신만 합니다. BLE 능동 스캔(SCAN_REQ), 프로브를 보내는 Wi-Fi 능동 스캔, 광고, 연결, 프레임 주입, 재밍은 금지이고 `tools/no_tx_check.py`가 CI에서 검사합니다.
+2. 데이터 프레임은 페이로드를 버리고 송신 주소, 개수, 바이트 수, RSSI만 보냅니다.
+3. 시작할 때 `hello`를 보내면서 송신 가능 여부(`tx_capable`)를 사실대로 적습니다. 송신이 가능하다고 밝힌 센서는 허브가 받지 않습니다.
 
 ## 2. 전송
 | 전송 | 엔드포인트 | 형식 |

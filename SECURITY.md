@@ -1,14 +1,15 @@
 # exam-uncheat 보안 정책
 
-## 신고
-보안 취약점이나 개인정보 노출 문제는 공개 이슈로 올리지 말고 **GitHub Security Advisories(비공개 취약점 제보)** 로 알려 주세요.
-저장소의 **Security → Report a vulnerability** 메뉴에서 제보할 수 있습니다: https://github.com/eduoneq/exam-uncheat/security/advisories/new
+## 제보 방법
 
-## 범위
-- 허브 API·콘솔의 취약점 (v0.1 허브는 인증이 없으며 기본적으로 127.0.0.1에만 바인딩합니다)
-- 가명화 우회, 원장 위변조 탐지 우회
-- 송신·공격 기능이 들어갈 수 있는 경로 (No-TX 정책 위반)
+보안 취약점이나 개인정보가 새는 문제를 찾았다면 공개 이슈 대신 GitHub Security Advisories로 비공개 제보를 해 주세요. 저장소의 Security 탭에서 Report a vulnerability를 누르거나 아래 주소로 바로 들어가면 됩니다.
 
-## 알려진 제한 (v0.1)
-- 허브에 인증·TLS가 없습니다. 교실 안 단일 기기 또는 격리된 유선망에서만 쓰세요.
-- 원장은 위변조 *탐지*용이며, 서명·타임스탬프 기관 연동은 아직 없습니다.
+https://github.com/eduoneq/exam-uncheat/security/advisories/new
+
+## 제보 대상
+
+허브 API와 콘솔의 취약점, 가명 처리나 원장 위변조 탐지를 우회하는 방법, 송신이나 공격 기능이 끼어들 수 있는 경로(No-TX 정책 위반)를 받습니다. v0.1 허브에는 인증이 없고 기본으로 127.0.0.1에만 바인딩합니다.
+
+## v0.1에서 알고 있는 제한
+
+허브에 인증과 TLS가 없습니다. 교실 안 단일 기기나 격리된 유선망에서만 써 주세요. 원장은 위변조를 찾아내는 용도이고 전자서명이나 타임스탬프 기관 연동은 아직 없습니다.

@@ -1,12 +1,12 @@
 # exam-uncheat 하드웨어 사양 (v0.1)
 
-- 작성: 2026-11-17 (KST). 가격은 **모두 대략치**이며 같은 날 웹에서 확인한 판매가다. 재고·환율·부가세 포함 여부가 판매처마다 다르니 구매 전 다시 확인할 것
-- 원칙: 모든 장비는 **수신 전용으로만** 사용한다. 송신 가능한 장비(HackRF 등)도 exam-uncheat 드라이버는 수신 명령만 쓴다
-- 이 문서의 "탐지"는 **신호가 있다는 단서**를 뜻한다. 부정행위 여부를 판정하지 않는다
+2026년 11월 17일(KST)에 정리했다. 가격은 모두 같은 날 웹에서 본 판매가를 옮긴 대략치다. 재고, 환율, 부가세 포함 여부가 판매처마다 다르니 사기 전에 한 번 더 확인하자.
+
+모든 장비는 수신 용도로만 쓴다. HackRF처럼 송신이 되는 장비도 exam-uncheat 드라이버는 수신 명령만 보낸다. 이 문서에서 말하는 "탐지"는 신호가 있다는 단서일 뿐이고 부정행위 여부를 판정한다는 뜻이 아니다.
 
 ---
 
-## 0. 한눈에 보기
+## 0. 구성 비교
 
 | 티어 | 구성 | 교실당 대략 비용 | 보는 것 | 못 보는 것 |
 | --- | --- | --- | --- | --- |
@@ -14,7 +14,7 @@
 | **권장 (Recommended)** | 라즈베리파이 5(또는 노트북) + ESP32-C5 보드 1~2개 + MT7612U 모니터 모드 USB 어댑터 1개 | **약 35만~50만원** (파이 포함) / 약 15만~20만원 (노트북 재사용) | 최소 티어 + **5 GHz** 프로브·비콘·단말 활동, Wi-Fi Direct 그룹, 채널별 혼잡도, 교실 앞/뒤 RSSI 비교 | 클래식 블루투스, 연결된 BLE 트래픽, LTE/5G 내용 |
 | **고급 (Advanced, 실험)** | 권장 + nRF52840 동글(BLE 스니퍼) + SDR(HackRF One / RTL-SDR V4) 또는 시리얼 스펙트럼 장비(tinySA Ultra / RF Explorer) | **추가 약 3만~80만원** | BLE 연결 시작 순간 추적(조건부), 2.4/5 GHz 대역 에너지, sub-GHz 무전·FM 송신기 에너지(RTL-SDR) | 암호화된 내용, 전원 꺼진 기기, 유선·자기유도 장치 |
 
-v0.1 레퍼런스: **최소 = ESP32-S3-DevKitC-1, 권장 = ESP32-C5-DevKitC-1 + MT7612U 어댑터.** 고급 장비는 "실험". **v0.1은 실물 하드웨어로 검증하지 않았고 시뮬레이터·리플레이로만 검증했습니다.**
+v0.1의 기준 보드는 최소 구성이 ESP32-S3-DevKitC-1, 권장 구성이 ESP32-C5-DevKitC-1과 MT7612U 어댑터다. 고급 구성은 실험 단계로 본다. v0.1은 실물 하드웨어가 아니라 시뮬레이터와 리플레이로만 검증했다.
 
 ---
 
@@ -31,18 +31,18 @@ v0.1 레퍼런스: **최소 = ESP32-S3-DevKitC-1, 권장 = ESP32-C5-DevKitC-1 + 
 
 가격 출처: [VCTEC ESP32-S3-DevKitC-1 N16R8](https://vctec.co.kr/product/esp32-s3-devkitc-1-%EB%B3%B4%EB%93%9C-usb-c-n16r8esp32-s3-devkitc-1-board-usb-c-n16r8/26620/), [디바이스마트 ESP32-S3 N16R8](https://www.devicemart.co.kr/goods/view?no=15028272), [메카솔루션 ESP32-S3 N16R8](https://www.mechasolution.com/goods/goods_view.php?goodsNo=608587), [디바이스마트 ESP32-C6-DevKitC-1-N8](https://www.devicemart.co.kr/goods/view?no=15401248), [메카솔루션 ESP32-C6-DevKitC-1](https://www.mechasolution.com/goods/goods_view.php?goodsNo=604891), [디바이스마트 ESP32 카테고리](https://www.devicemart.co.kr/goods/catalog?code=000500040007)
 
-### 1.2 할 수 있는 것
-- **BLE 광고 연속 수신(패시브 스캔)** — 폰 앱처럼 화면 꺼짐·OS 제한으로 멈추지 않음. 회사 ID·서비스 UUID·제조사 데이터·이름을 시그니처 DB와 대조
-- **2.4 GHz Wi-Fi 무차별(promiscuous) 수신** — ESP-IDF 스니퍼 모드는 관리·데이터·제어 프레임을 앱으로 넘겨준다([ESP-IDF Wi-Fi Sniffer Mode](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c5/api-guides/wifi-driver/wifi-modes.html)). exam-uncheat 펌웨어는 **관리 프레임(프로브 요청·비콘·P2P)만 해석**하고, 데이터 프레임은 송신 주소·개수·길이·RSSI만 센 뒤 페이로드를 버린다
-- 채널 호핑(1~13ch)으로 교실 내 2.4 GHz 활동 파악
+### 1.2 받을 수 있는 신호
+- BLE 광고를 패시브 스캔으로 계속 받는다. 폰 앱처럼 화면이 꺼지거나 OS가 제한해서 멈추는 일이 없다. 회사 ID, 서비스 UUID, 제조사 데이터, 이름을 시그니처 DB와 대조한다.
+- 2.4 GHz Wi-Fi를 무차별(promiscuous) 모드로 받는다. ESP-IDF 스니퍼 모드는 관리·데이터·제어 프레임을 앱으로 넘겨준다([ESP-IDF Wi-Fi Sniffer Mode](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c5/api-guides/wifi-driver/wifi-modes.html)). exam-uncheat 펌웨어는 그중 관리 프레임(프로브 요청, 비콘, P2P)만 해석하고 데이터 프레임은 송신 주소, 개수, 길이, RSSI만 센 뒤 페이로드를 버린다.
+- 1~13번 채널을 돌며 교실 안 2.4 GHz 활동을 훑는다.
 
-### 1.3 못 하는 것
-- **5 GHz 불가** (S3·C6는 2.4 GHz 전용)
-- **클래식 블루투스(BR/EDR) 불가** (S3·C6는 BLE만) — 구형 이어버드·핸즈프리 일부를 놓칠 수 있음
-- 이미 연결된 BLE 기기의 통신(광고 중단된 페어링 안경 포함)
-- 한 칩이 BLE와 Wi-Fi를 같은 무선부로 번갈아 쓰므로, 둘 다 켜면 각각 놓치는 패킷이 늘어난다 → **가능하면 보드 2개(BLE 전용 1, Wi-Fi 전용 1)** 권장
-- 채널 호핑 중에는 다른 채널의 짧은 신호를 놓친다
-- LTE/5G, 유선, 자기유도 루프, 전원 꺼진 기기
+### 1.3 놓치는 신호
+- S3와 C6는 2.4 GHz 전용이라 5 GHz를 못 받는다.
+- BLE만 받기 때문에 클래식 블루투스(BR/EDR)를 쓰는 구형 이어버드나 핸즈프리 일부를 놓칠 수 있다.
+- 이미 연결된 BLE 기기의 통신은 보이지 않는다. 광고를 멈춘 페어링 안경도 여기에 들어간다.
+- 칩 하나가 BLE와 Wi-Fi를 같은 무선부로 번갈아 쓰기 때문에 둘 다 켜면 양쪽 모두 놓치는 패킷이 늘어난다. 가능하면 BLE 전용과 Wi-Fi 전용으로 보드 2개를 쓰자.
+- 채널을 옮겨 다니는 동안 다른 채널의 짧은 신호를 놓친다.
+- LTE/5G, 유선, 자기유도 루프, 전원이 꺼진 기기는 처음부터 범위 밖이다.
 
 ---
 
@@ -60,15 +60,15 @@ v0.1 레퍼런스: **최소 = ESP32-S3-DevKitC-1, 권장 = ESP32-C5-DevKitC-1 + 
 어댑터 근거: [morrownr/USB-WiFi 칩셋 표](https://github.com/morrownr/USB-WiFi/blob/main/home/USB_WiFi_Chipsets.md), [morrownr 모니터 모드 권장 어댑터](https://github.com/morrownr/USB-WiFi/blob/main/home/Recommended_Adapters_for_Kali_Linux.md), [StationX 2026-11 업데이트(MT7921AU 회귀·6.19.8 수정)](https://app.stationx.net/articles/best-wifi-adapters-for-kali-linux)
 가격 출처: [아이씨뱅큐 XIAO ESP32-C5](https://www.icbanq.com/P016998683), [아이씨뱅큐 ESP32-C6/C5 카테고리](https://www.icbanq.com/A02_product/productList.do?cateCode=101144140114), [디바이스마트 XIAO 카테고리](https://www.devicemart.co.kr/goods/catalog?code=000500040012), [퍼스트봇 Pi 5](http://www.firstbot.co.kr/goods/goods_view.php?goodsNo=1000000646), [임베디드코리아 Pi 5](https://eku.co.kr/product/%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4-5-raspberry-pi-5-model-8gb-16gb/14/category/1/display/2/), [엘레파츠 라즈베리파이](https://eleparts.co.kr/promotion/cate_event?event_seq=1622), [아이씨팩토리 Pi 5 8GB](https://icfactory.co.kr/product/%EC%A0%95%ED%92%88-%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B45-raspberry-pi-5-8gb/1240/), [다나와 AWUS036 검색](https://search.danawa.com/dsearch.php?query=AWUS036), [프리쉽 AWUS036ACM](https://mall.freeship.co.kr/goods/content.asp?cate=12552&guid=8995681)
 
-> 라즈베리파이 내장 Wi-Fi(CYW43455)는 기본적으로 모니터 모드가 안 되지만, Kali 2025.1 이후 Nexmon 패키지로 Pi 5 포함 모니터 모드가 가능하다고 Kali가 밝혔다([Kali 블로그 2025-07-22](https://www.kali.org/blog/raspberry-pi-wi-fi-glow-up/)). 다만 Kali 문서도 "항상 안정적이지는 않다"고 적고 있어 **exam-uncheat는 외장 MT7612U 어댑터를 권장**하고 내장 Nexmon은 실험 옵션으로만 둔다.
+> 라즈베리파이 내장 Wi-Fi(CYW43455)는 기본적으로 모니터 모드가 안 되지만, Kali 2025.1 이후 Nexmon 패키지로 Pi 5 포함 모니터 모드가 가능하다고 Kali가 밝혔다([Kali 블로그 2025-07-22](https://www.kali.org/blog/raspberry-pi-wi-fi-glow-up/)). 다만 Kali 문서도 "항상 안정적이지는 않다"고 적고 있어서 exam-uncheat는 외장 MT7612U 어댑터를 권하고 내장 Nexmon은 실험 옵션으로만 둔다.
 
-### 2.2 할 수 있는 것 (최소 티어에 더해)
-- **5 GHz 프로브 요청·비콘·단말 활동** (C5, MT7612U)
-- **AP에 붙은 단말(STA) 존재와 활동량** — 핫스팟을 끄고 기존 AP에만 붙은 카메라·폰도 데이터 프레임 통계로 보인다(내용은 저장 안 함)
-- **Wi-Fi Direct(P2P) 그룹** — 스마트안경이 미디어 전송·라이브뷰에 Wi-Fi Direct를 쓴다는 커뮤니티 역분석 자료가 있음([Meta glasses protocol, 비공식](https://visor.macedonga.com/protocol/radios-and-links/)). **벤치·현장 검증 전 가설**
-- 센서 2개를 교실 앞·뒤에 두고 RSSI를 비교해 "어느 쪽에 가까운지" 정도의 힌트
+### 2.2 최소 구성보다 더 받는 신호
+- 5 GHz 프로브 요청, 비콘, 단말 활동 (C5, MT7612U)
+- AP에 붙은 단말(STA)이 있는지, 얼마나 통신하는지. 핫스팟을 끄고 기존 AP에만 붙은 카메라나 폰도 데이터 프레임 통계로 보인다. 내용은 저장하지 않는다.
+- Wi-Fi Direct(P2P) 그룹. 스마트안경이 미디어 전송과 라이브뷰에 Wi-Fi Direct를 쓴다는 커뮤니티 역분석 자료가 있다([Meta glasses protocol, 비공식](https://visor.macedonga.com/protocol/radios-and-links/)). 실험실이나 현장에서 확인하기 전까지는 가설로 둔다.
+- 센서 2개를 교실 앞뒤에 두고 RSSI를 비교하면 어느 쪽에 더 가까운지 정도는 짐작할 수 있다.
 
-### 2.3 못 하는 것
+### 2.3 그래도 놓치는 신호
 - 클래식 블루투스 수신, 연결된 BLE 트래픽 내용
 - 정확한 좌석 위치(RSSI는 사람·책상·벽에 크게 흔들림)
 - 6 GHz(MT7921AU는 가능하지만 v0.1 미지원)
@@ -107,15 +107,15 @@ v0.1 레퍼런스: **최소 = ESP32-S3-DevKitC-1, 권장 = ESP32-C5-DevKitC-1 + 
 
 ## 5. 교실 배치·전원
 
-**배치(일반 교실 1개 기준, 권고안 — 현장 검증 전)**
-- 센서 A: **교탁**(앞), 바닥에서 약 1~1.5 m 높이. 금속 캐비닛·모니터 바로 옆 피하기
-- 센서 B(권장 티어): **교실 뒤편 중앙** → 앞·뒤 RSSI 비교로 대략적 방향
-- 모니터 모드 어댑터: 허브에 USB 연장선으로 연결, 안테나 세워서 교실 중앙 방향
-- 수거한 휴대전화 보관 장소는 **교실 밖**(페어링된 안경은 폰이 근처에 있어야 동작 — 운영 문서에 명시). 교실 안 보관 시 기준선·단서가 크게 오염됨
-- 빈 교실 기준선은 **수험생 입실 전 2~5분**, 실제 시험과 같은 센서 위치·채널 계획으로 측정
-- 복도·옆 교실 신호가 섞이므로 **약한 신호(RSSI 임계값 이하)는 기본 "참고" 등급**
+**배치.** 일반 교실 하나를 기준으로 한 권고안이고 현장에서 검증하기 전이다.
+- 센서 A는 앞쪽 교탁에, 바닥에서 1~1.5 m쯤 높이로 둔다. 금속 캐비닛이나 모니터 바로 옆은 피한다.
+- 권장 구성이라면 센서 B를 교실 뒤편 가운데에 둔다. 앞뒤 RSSI를 비교해 대략적인 방향을 본다.
+- 모니터 모드 어댑터는 USB 연장선으로 허브에 잇고 안테나를 세워 교실 가운데를 향하게 한다.
+- 걷은 휴대전화는 교실 밖에 보관한다. 페어링된 안경은 폰이 가까이 있어야 동작하므로 운영 문서에도 이 점을 적어 둔다. 교실 안에 두면 기준선과 단서가 크게 흐트러진다.
+- 빈 교실 기준선은 수험생이 들어오기 전에 2~5분 동안, 실제 시험과 같은 센서 위치와 채널 계획으로 잰다.
+- 복도와 옆 교실 신호가 섞이기 때문에 RSSI 임계값보다 약한 신호는 기본으로 "참고" 등급에 둔다.
 
-**전원(대략치·추정)**
+**전원.** 아래 값은 대략치이거나 추정이다.
 | 장비 | 전원 | 비고 |
 | --- | --- | --- |
 | ESP32 보드 | USB 5 V. 수신 상태에서 대략 0.5 W 이하로 추정 [확인 필요: 보드별 데이터시트] | 10,000 mAh 보조배터리로 한 시험일 충분할 것으로 추정 |
@@ -136,7 +136,7 @@ v0.1 레퍼런스: **최소 = ESP32-S3-DevKitC-1, 권장 = ESP32-C5-DevKitC-1 + 
 2. **재밍 장비와 연동하지 않는다.** 전파법 제29조③의 전파차단장치 사용 예외(경호·군사·대테러·공항·원자력시설 방호 등)에 시험장은 없다. 제29조⑧·제84조 1의2호: 인가 없이 전파차단장치를 제조·수입·판매하면 3년 이하 징역 또는 3천만원 이하 벌금([LawPlayer 제29조](https://lawplayer.com/kr/article/001732/002900), [LBOX 제84조](https://lbox.kr/statute/%EC%A0%84%ED%8C%8C%EB%B2%95/%EB%B3%B8%EB%AC%B8%20%3E%20%EC%A0%9C9%EC%9E%A5%20%3E%20%EC%A0%9C84%EC%A1%B0)).
 3. **KC 적합성평가.** 적합성평가를 받지 않은 기자재를 판매하거나 판매 목적으로 제조·수입하면 제84조 5호 처벌 대상. 
    - 개인이 판매 목적 없이 쓰려고 반입하는 기자재는 **모델당 1대** 면제(반입 후 1년 내 판매하면 면제 안 됨). 시험·품질검사용, 연구개발용은 별도 수량·서류 면제 제도가 있다([국립전파연구원 FAQ](https://www.rra.go.kr/ko/notice/D_e_faq2_1.do?fa_category=compt&fa_type=b), [요건면제 안내](https://www.rra.go.kr/ko/popup/popup_100430.jsp)).
-   - **실무 권고:** 기관·학교는 **국내 정식 유통·KC 표시 제품**을 산다. 해외 직구·구매대행 어댑터(예: 다나와 "해외" 리스팅)는 개인 실험용으로만.
+   - 기관과 학교는 국내에 정식으로 유통되는 KC 표시 제품을 사는 편이 안전하다. 해외 직구나 구매대행 어댑터(예: 다나와 "해외" 리스팅)는 개인 실험용으로만 쓴다.
    - ESP32-S3-WROOM-1 **모듈**은 적합등록(R-R-es5-ESP32S3WROOM1)이 있으나, 모듈 인증이 **완제품(개발보드·키트) 판매까지 자동으로 덮는지는 별개** [확인 필요]. EDUONEQ가 키트를 묶어 판매하려면 완제품 기준 적합성평가 검토가 먼저다.
    - 각 제품의 등록 여부는 [국립전파연구원 인증현황 검색](https://www.rra.go.kr/ko/license/A_b_popup_keyno.do?key_no=N)에서 모델명으로 확인.
 4. **시험장 반입 규정.** 수능 고사장은 감독관도 전자기기 반입·소지가 금지된다는 보도가 있다([매일경제 2023-11-17](https://www.mk.co.kr/news/society/10877949)). 센서·허브 설치는 **시험 시행기관의 사전 승인**이 전제다.

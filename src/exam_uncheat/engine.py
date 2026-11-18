@@ -151,18 +151,18 @@ class Engine:
     def _is_new(self, g: Group) -> tuple[bool, str]:
         b = self.baseline.get(g.key)
         if g.kind == "detector.alert":
-            return True, "상용 탐지기 경보 또는 감독관 수동 입력"
+            return True, "상용 탐지기 경보나 감독관이 직접 입력한 기록"
         if g.kind == "rf.energy":
             if g.max_occupancy is None:
                 return False, ""
             base = (b or {}).get("max_occupancy") or 0.0
             if g.max_occupancy >= base + self.cfg.rf_occupancy_delta:
-                return True, f"대역 점유율 {base:.0%} → {g.max_occupancy:.0%} (빈 교실 대비 증가)"
+                return True, f"대역 점유율이 빈 교실 {base:.0%}에서 {g.max_occupancy:.0%}로 늘어남"
             return False, ""
         if b is None:
             return True, "빈 교실 기준선에 없던 신호"
         if g.pids and len(g.pids) > (b.get("distinct") or 0):
-            return True, f"같은 종류 신호 개수 증가 (기준선 {b.get('distinct')} → {len(g.pids)})"
+            return True, f"같은 종류 신호 개수가 기준선 {b.get('distinct')}개에서 {len(g.pids)}개로 늘어남"
         return False, ""
 
     def _evaluate(self, g: Group, sigs: list[dict]) -> dict | None:
@@ -185,9 +185,9 @@ class Engine:
         if g.max_rssi is not None:
             if g.max_rssi >= self.cfg.near_rssi_dbm:
                 score += 10
-                reasons.append(f"신호 강도 최고 {g.max_rssi:.0f} dBm (교실 안 가능성)")
+                reasons.append(f"신호 강도 최고 {g.max_rssi:.0f} dBm, 교실 안일 가능성이 큼")
             elif g.max_rssi < self.cfg.weak_rssi_dbm:
-                reasons.append(f"약한 신호 (최고 {g.max_rssi:.0f} dBm) — 복도·옆 교실 가능성")
+                reasons.append(f"약한 신호(최고 {g.max_rssi:.0f} dBm)라 복도나 옆 교실일 수 있음")
         level = "urgent" if score >= 70 else "check" if score >= 25 else "info"
         if g.max_rssi is not None and g.max_rssi < self.cfg.weak_rssi_dbm:
             level = "info"
@@ -233,7 +233,7 @@ class Engine:
         out = []
         glasses = [c for c in self.clues.values() if "smart_glasses" in c["categories"]]
         direct = [c for c in self.clues.values() if "wifi_direct" in c["categories"]]
-        reason = "스마트안경 BLE 단서와 Wi-Fi Direct 그룹이 같은 시간대에 출현"
+        reason = "스마트안경 BLE 단서와 Wi-Fi Direct 그룹이 같은 시간대에 함께 잡힘"
         for gc in glasses:
             if reason in gc["reasons"]:
                 continue

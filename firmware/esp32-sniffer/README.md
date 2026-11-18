@@ -1,9 +1,8 @@
 # esp32-sniffer (v0.1)
 
-> **상태:** ESP32-S3·ESP32-C6 대상으로 **빌드 확인**(PlatformIO, ESP-IDF 6.1, 경고 없음).
-> **실기기 동작 검증은 아직 하지 않았습니다.** ESP32-C5는 아직 빌드 확인 전입니다. 이슈·PR 환영.
+> ESP32-S3와 ESP32-C6 대상으로 빌드를 확인했습니다(PlatformIO, ESP-IDF 6.1, 경고 없음). 실기기에서는 아직 돌려 보지 않았고, ESP32-C5 빌드도 확인 전입니다. 이슈와 PR을 기다립니다.
 
-수신 전용 ESP32 센서 펌웨어입니다. 관측 결과를 USB 시리얼로 `exam-uncheat` 줄단위 JSON(NDJSON)으로 내보냅니다.
+수신 전용 ESP32 센서 펌웨어입니다. 받은 신호를 `exam-uncheat` 줄 단위 JSON(NDJSON)으로 바꿔 USB 시리얼로 내보냅니다.
 
 | 대상 | Wi-Fi | BLE |
 | --- | --- | --- |
