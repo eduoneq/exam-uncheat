@@ -95,10 +95,12 @@ To use real sensors, run `exam-uncheat hub --serial /dev/ttyACM0:115200` with th
 
 Prices were checked on 2026-11-17 and will drift, so look at [HARDWARE.md](docs/HARDWARE.md) before you buy. Radios that could transmit are driven with receive-only commands.
 
-| Kit | Parts | Rough cost per room | Sees | Misses |
-| --- | --- | --- | --- | --- |
-| Minimum | A laptop you already have, plus one or two ESP32-S3 or ESP32-C6 boards | KRW 15,000–50,000 | BLE advertising, 2.4 GHz Wi-Fi management frames | 5 GHz, classic Bluetooth, connected BLE, LTE/5G |
-| Recommended | Raspberry Pi 5 or a laptop, one or two ESP32-C5 boards, an MT7612U monitor-mode adapter | KRW 350,000–500,000 with a Pi, 150,000–200,000 with a laptop | Everything above, plus 5 GHz, Wi-Fi Direct, and front/back signal strength | Classic Bluetooth, connected BLE, LTE/5G content |
+| | Minimum | Recommended |
+| --- | --- | --- |
+| Parts | A laptop you already have, plus one or two ESP32-S3 or ESP32-C6 boards | Raspberry Pi 5 or a laptop, one or two ESP32-C5 boards, an MT7612U monitor-mode adapter |
+| Rough cost per room | KRW 15,000–50,000 | KRW 350,000–500,000 with a Pi, 150,000–200,000 with a laptop |
+| Sees | BLE advertising, 2.4 GHz Wi-Fi management frames | Everything on the left, plus 5 GHz, Wi-Fi Direct, and front/back signal strength |
+| Misses | 5 GHz, classic Bluetooth, connected BLE, LTE/5G | Classic Bluetooth, connected BLE, LTE/5G content |
 
 ## Legal
 
